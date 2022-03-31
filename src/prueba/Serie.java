@@ -7,8 +7,7 @@ public class Serie {
 	private String modelo;
 	private int anioFabric;
 
-	public Serie(int numSerie, String marca, String modelo, int anioFabric) {
-		this.numSerie = numSerie;
+	public Serie( String marca, String modelo, int anioFabric) {
 		this.marca = marca;
 		this.modelo = modelo;
 		this.anioFabric = anioFabric;

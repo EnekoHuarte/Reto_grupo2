@@ -1,12 +1,27 @@
 package prueba;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
 public class test {
+	public static int comprobarSerie(Serie s,Connection c) throws SQLException {
+
+		Statement stm = null;
+		ResultSet rs = null;
+		
+		stm = c.createStatement();
+		rs = stm.executeQuery("select * from serie where marca like '"+s.getMarca()+"'&& modelo like '"+s.getModelo()+"', anioFabric like"+s.getAnioFabric());
+			if(rs.getRow()==0) {
+				stm.executeUpdate("INSERT INTO serie(marca,modelo,anioFabric) VALUES('"+s.getMarca()+"','"+s.getModelo()+"',"+s.getAnioFabric());
+			}
+		rs = stm.executeQuery("select numSerie from serie where marca like '"+s.getMarca()+"'&& modelo like '"+s.getModelo()+"', anioFabric like"+s.getAnioFabric());
+		int numSerie = rs.getInt(1);
+		return numSerie;
+	}
 	public static ArrayList<String> vehiculosStock(Connection c) throws SQLException {
 		
 		Statement stm = null;
@@ -26,6 +41,55 @@ public class test {
 			vehic.add(datos);
 		}
 		return vehic;
+	}
+	
+	private static void inportarVehiculo(Connection cn, String respuesta) throws SQLException {
+		
+		Statement stm = null;
+		ResultSet rs = null;
+		Boolean existe = false;
+
+	
+			System.out.println("Introduce la matricula");
+			String matricula = Console.readString();
+			System.out.println("Introduce el número de Bastidor");
+			int numBastidor = Console.readInt();
+			System.out.println("Introduce el color");
+			String color = Console.readString();
+			System.out.println("Introduce la marca del vehiculo");
+			String marca = Console.readString();
+			System.out.println("Introduce el modelo");
+			String modelo = Console.readString();
+			System.out.println("Introduce el año de fabricación");
+			int anioFab = Console.readInt();
+			System.out.println("Introduce el precio");
+			double precio = Console.readDouble();
+			System.out.println("Introduce el número de asientos");
+			int numAsientos = Console.readInt();
+			System.out.println("NumPuertas");
+			int numPuertas = Console.readInt();
+			System.out.println("capMaletero");
+			int capMaletero = Console.readInt();
+			
+			Serie serie = new Serie(marca,modelo,anioFab);
+			Coche v =new Coche(matricula,numBastidor,color,numAsientos,precio,serie,numPuertas,capMaletero);
+			int numSeire = comprobarSerie(serie,cn);
+			serie.setNumSerie(numSeire);
+			
+			
+			PreparedStatement ps = null;
+			ps = cn.prepareStatement("INSERT INTO vehiculo values(?,?,?,?,?,?,?)");
+			ps.setString(1, v.getMatricula());
+			ps.setInt(2, v.getNumBastidor());
+			ps.setString(3, v.getColor());
+			ps.setInt(4, v.getNumAsientos());
+			ps.setDouble(5, v.getPrecio());
+			ps.setInt(6,v.getSerie().getNumSerie());
+			ps.setInt(7, v.getCapMaletero());
+			if(ps.executeUpdate()!=1) {
+				throw new SQLException("Error");
+			}
+
 	}
 	public static void main(String[] args) {
 	
@@ -105,27 +169,6 @@ public class test {
 			
 		}while(elec!=7);
 	}
-	
-	private static void inportarVehiculo(Connection cn, String respuesta) throws SQLException {
-		
-		Statement stm = null;
-
-
-
-		stm = cn.createStatement();
-		
-		
-		stm.executeUpdate("INSERT INTO Vehiculo (matricula, numBastidor, color, tipo, numSerie, precio, numAsientos)" + 
-					"VALUES('123sa5a',12,'rojo','coche',1,5000,2)");
-		
-			
-
-		
-	} 
-	
-	
-
-
 
 }
 
