@@ -4,7 +4,7 @@ public abstract class Vehiculo {
 
 
 	private String matricula;
-	private int numBastidor;
+	private String numBastidor;
 	private String color;
 	private int numAsientos;
 	private double precio;
@@ -12,15 +12,22 @@ public abstract class Vehiculo {
 	
 	private boolean pintado;
 	
-	public Vehiculo(String matricula, int numBastidor, String color, int numAsientos, double precio, Serie serie) {
+	public Vehiculo(String matricula, String numBastidor, String color, int numAsientos, double precio, String marca, String modelo, int anioFab, int numSerie) {
 
 		this.matricula = matricula;
 		this.numBastidor = numBastidor;
 		this.color = color;
 		this.numAsientos = numAsientos;
 		this.precio = precio;
-		this.serie = serie;
+		this.serie = new Serie(marca,modelo,anioFab);
+		this.serie.setNumSerie(numSerie);
 		this.pintado = false;
+	}
+
+	@Override
+	public String toString() {
+		return "[matricula=" + matricula + ", numBastidor=" + numBastidor + ", color=" + color
+				+ ", numAsientos=" + numAsientos + ", precio=" + precio + ", serie=" + serie.getNumSerie() + ", pintado=" + pintado;
 	}
 
 	public String getMatricula() {
@@ -31,11 +38,11 @@ public abstract class Vehiculo {
 		this.matricula = matricula;
 	}
 
-	public int getNumBastidor() {
+	public String getNumBastidor() {
 		return numBastidor;
 	}
 
-	public void setNumBastidor(int numBastidor) {
+	public void setNumBastidor(String numBastidor) {
 		this.numBastidor = numBastidor;
 	}
 

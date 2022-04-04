@@ -22,38 +22,65 @@ public class test {
 		int numSerie = rs.getInt(1);
 		return numSerie;
 	}
-	public static ArrayList<String> vehiculosStock(Connection c) throws SQLException {
+	
+	public static ArrayList<Coche> cochesStock(Connection c) throws SQLException {
 		
 		Statement stm = null;
 		ResultSet rs = null;
-		ArrayList <String> vehic = new ArrayList<String>();
+		ResultSet rs2 = null;
+		ArrayList <Coche> vehic = new ArrayList<Coche>();
+		Coche coche;
 		
 		stm = c.createStatement();
-		rs = stm.executeQuery("select * from vehiculo");
+		
+		rs = stm.executeQuery("select * from coche");
 		while(rs.next()) {
-			String datos = "matricula: " + rs.getString(1)+", "+
-					"numBastidor: " +rs.getString(2)+", "+
-					"color: " +rs.getString(3)+", "+
-					"tipo:" +rs.getString(4)+", "+
-					"serie: " +rs.getString(5)+", "+
-					"precio:" +rs.getString(6)+", "+
-					"numAsientos: " +rs.getString(7);
-			vehic.add(datos);
+			rs2 = stm.executeQuery("Select * from Serie where numSerie = "+rs.getInt(4));
+			int numSerie = rs2.getInt(1);
+			String marca = rs2.getString(2);
+			String modelo = rs2.getString(3);
+			int anioFab = rs2.getInt(4);
+			coche = new Coche(rs.getString(1),rs.getString(2),rs.getString(3),rs.getDouble(5),rs.getInt(6),rs.getInt(7),rs.getInt(8),marca,modelo,anioFab, numSerie);
+			vehic.add(coche);
+		}
+		
+		return vehic;
+	}
+	
+	public static ArrayList<Camion> camionesStock(Connection c) throws SQLException {
+		
+		Statement stm = null;
+		ResultSet rs = null;
+		ResultSet rs2 = null;
+		ArrayList <Camion> vehic = new ArrayList<Camion>();
+		Camion cami;
+		
+		stm = c.createStatement();
+		rs = stm.executeQuery("select * from camion");
+		
+		while(rs.next()) {
+			rs2 = stm.executeQuery("Select * from Serie where numSerie = "+rs.getInt(4));
+			int numSerie = rs2.getInt(1);
+			String marca = rs2.getString(2);
+			String modelo = rs2.getString(3);
+			int anioFab = rs2.getInt(4);
+			cami = new Camion(rs.getString(1),rs.getString(2),rs.getString(3),rs.getDouble(5),rs.getInt(6),rs.getInt(7),rs.getString(8),marca,modelo,anioFab, numSerie);
+			vehic.add(cami);
 		}
 		return vehic;
 	}
 	
-	private static void inportarVehiculo(Connection cn, String respuesta) throws SQLException {
+	private static void inportarCoche(Connection cn) throws SQLException,NumberFormatException {
 		
 		Statement stm = null;
 		ResultSet rs = null;
-		Boolean existe = false;
+
 
 	
 			System.out.println("Introduce la matricula");
 			String matricula = Console.readString();
 			System.out.println("Introduce el número de Bastidor");
-			int numBastidor = Console.readInt();
+			String numBastidor = Console.readString();
 			System.out.println("Introduce el color");
 			String color = Console.readString();
 			System.out.println("Introduce la marca del vehiculo");
@@ -72,24 +99,76 @@ public class test {
 			int capMaletero = Console.readInt();
 			
 			Serie serie = new Serie(marca,modelo,anioFab);
-			Coche v =new Coche(matricula,numBastidor,color,numAsientos,precio,serie,numPuertas,capMaletero);
-			int numSeire = comprobarSerie(serie,cn);
-			serie.setNumSerie(numSeire);
+			int numSerie = comprobarSerie(serie,cn);
+			Coche v =new Coche(matricula,numBastidor,color,numAsientos,precio,numSerie,numPuertas,capMaletero);
 			
 			
 			PreparedStatement ps = null;
-			ps = cn.prepareStatement("INSERT INTO vehiculo values(?,?,?,?,?,?,?)");
+			ps = cn.prepareStatement("INSERT INTO coche values(?,?,?,?,?,?,?,?)");
 			ps.setString(1, v.getMatricula());
-			ps.setInt(2, v.getNumBastidor());
+			ps.setString(2, v.getNumBastidor());
 			ps.setString(3, v.getColor());
-			ps.setInt(4, v.getNumAsientos());
+			ps.setInt(4,v.getSerie().getNumSerie());
 			ps.setDouble(5, v.getPrecio());
-			ps.setInt(6,v.getSerie().getNumSerie());
-			ps.setInt(7, v.getCapMaletero());
+			ps.setInt(6, v.getNumAsientos());
+			ps.setInt(7, v.getNumPuertas());
+			ps.setInt(8, v.getCapMaletero());
 			if(ps.executeUpdate()!=1) {
 				throw new SQLException("Error");
 			}
 
+	}
+	
+	private static void importarCamion(Connection cn) throws SQLException,NumberFormatException {
+		
+		Statement stm = null;
+		ResultSet rs = null;
+		Boolean existe = false;
+
+	
+			System.out.println("Introduce la matricula");
+			String matricula = Console.readString();
+			System.out.println("Introduce el número de Bastidor");
+			String numBastidor = Console.readString();
+			System.out.println("Introduce el color");
+			String color = Console.readString();
+			System.out.println("Introduce la marca del vehiculo");
+			String marca = Console.readString();
+			System.out.println("Introduce el modelo");
+			String modelo = Console.readString();
+			System.out.println("Introduce el año de fabricación");
+			int anioFab = Console.readInt();
+			System.out.println("Introduce el precio");
+			double precio = Console.readDouble();
+			System.out.println("Introduce el número de asientos");
+			int numAsientos = Console.readInt();
+			System.out.println("carga total");
+			int carga = Console.readInt();
+			System.out.println("tipo mercancia(G = General / A = Árido / P = Peligroso)");
+			String tipoMercancia = Console.readString();
+			
+			
+			Serie serie = new Serie(marca,modelo,anioFab);
+			int numSerie = comprobarSerie(serie,cn);
+			Camion v =new Camion(matricula,numBastidor,color,numAsientos,precio,numSerie,carga,tipoMercancia);
+
+			
+			
+			PreparedStatement ps = null;
+			ps = cn.prepareStatement("INSERT INTO camion values(?,?,?,?,?,?,?,?)");
+			ps.setString(1, v.getMatricula());
+			ps.setString(2, v.getNumBastidor());
+			ps.setString(3, v.getColor());
+			ps.setInt(4,v.getSerie().getNumSerie());
+			ps.setDouble(5, v.getPrecio());
+			ps.setInt(6, v.getNumAsientos());
+			ps.setInt(7, v.getCarga());
+			ps.setObject(8, v.getTipoMercancia());
+			if(ps.executeUpdate()!=1) {
+				throw new SQLException("Error");
+			}
+
+		
 	}
 	public static void main(String[] args) {
 	
@@ -97,7 +176,8 @@ public class test {
 		Connection cn = conexion.conectar();
 		System.out.println("Bienvenido");
 		int elec = 1;
-		ArrayList<String> resultado = new ArrayList<String>();
+		ArrayList<Coche> coches = new ArrayList<Coche>();
+		ArrayList<Camion> camiones = new ArrayList<Camion>();
 		
 		do {
 			try {
@@ -118,9 +198,16 @@ public class test {
 				case 1:
 					try {
 						System.out.println();
-						resultado = vehiculosStock(cn);
-						for(String i : resultado) {
-							System.out.println(i);
+						coches = cochesStock(cn);
+						camiones = camionesStock(cn);
+						System.out.println("Coches Stock");
+						for(Coche i : coches) {
+							System.out.println(coches.toString());
+							System.out.println("---------------");
+						}
+						System.out.println("Camiones Stock");
+						for(Camion i : camiones) {
+							System.out.println(camiones.toString());
 							System.out.println("---------------");
 						}
 					}catch(SQLException e) {
@@ -134,23 +221,42 @@ public class test {
 						System.out.println("quieres añadir un coche o un camion?");
 						String respuesta = Console.readString();
 						
-						if (respuesta.equalsIgnoreCase("coche") || respuesta.equalsIgnoreCase("camion")) {
-							inportarVehiculo(cn, respuesta);
+						if (respuesta.equalsIgnoreCase("coche")) {
+							inportarCoche(cn);
 							System.out.println("Añadido OK");
+						}else if (respuesta.equalsIgnoreCase("camion")){
+							importarCamion(cn);
 						}else {
 							throw new VehiculoException("No se ha establecido bien el tipo de vehiculo");
 						}
 					}catch(VehiculoException e){
 						System.out.println(e.getMessage());
 					} catch (SQLException e) {
-						e.printStackTrace();
+						System.out.println(e.getMessage());
+					}catch(NumberFormatException e) {
+						System.out.println(e.getMessage());
 					}
-					
-					
-					
 					
 					break;
 				case 3:
+					try {
+						System.out.println("quieres vender un coche o un camion?");
+						String respuesta = Console.readString();
+						
+						if (respuesta.equalsIgnoreCase("coche")) {
+							eliminarCoche(cn);
+							System.out.println("Añadido OK");
+						}else if (respuesta.equalsIgnoreCase("camion")){
+						}else {
+							throw new VehiculoException("No se ha establecido bien el tipo de vehiculo");
+						}
+					}catch(VehiculoException e){
+						System.out.println(e.getMessage());
+					} catch (SQLException e) {
+						System.out.println(e.getMessage());
+					}catch(NumberFormatException e) {
+						System.out.println(e.getMessage());
+					}
 					break;
 				case 4:
 					break;
@@ -169,6 +275,22 @@ public class test {
 			
 		}while(elec!=7);
 	}
+
+	private static void eliminarCoche(Connection cn)throws SQLException {
+		
+		ArrayList<Coche> coches = new ArrayList<Coche>();
+		coches = cochesStock(cn);
+		for(Coche i : coches) {
+			System.out.println(i);
+			System.out.println("---------------");
+		}
+		System.out.println("Escriba la matricula del coche para vender");
+		String matricula = Console.readString();
+		
+		
+	}
+
+
 
 }
 
